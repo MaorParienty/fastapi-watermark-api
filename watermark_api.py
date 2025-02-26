@@ -13,7 +13,7 @@ def hex_to_rgba(hex_color: str, alpha=128) -> tuple:
         return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4)) + (alpha,)
     return (255, 255, 255, alpha)  # Default to white
 
-def add_x_watermark(image_data: bytes, text: str, color: str) -> io.BytesIO:
+def add_x_watermark(image_data: bytes, text: str, color: str, font_size: int) -> io.BytesIO:
     # Open the image
     image = Image.open(io.BytesIO(image_data)).convert("RGBA")
     width, height = image.size
@@ -26,7 +26,6 @@ def add_x_watermark(image_data: bytes, text: str, color: str) -> io.BytesIO:
     draw = ImageDraw.Draw(overlay)
 
     # Load font
-    font_size = int(min(width, height) * 0.05)  # 5% of the image size
     try:
         font = ImageFont.truetype("arial.ttf", font_size)
     except:
@@ -59,7 +58,12 @@ def add_x_watermark(image_data: bytes, text: str, color: str) -> io.BytesIO:
     return img_io
 
 @app.post("/watermark")
-async def watermark_image(file: UploadFile = File(...), text: str = "WATERMARK", color: str = "#FFFFFF"):
+async def watermark_image(
+    file: UploadFile = File(...), 
+    text: str = "WATERMARK", 
+    color: str = "#FFFFFF", 
+    font_size: int = 50  # Default font size
+):
     image_bytes = await file.read()
-    watermarked_image = add_x_watermark(image_bytes, text, color)
+    watermarked_image = add_x_watermark(image_bytes, text, color, font_size)
     return StreamingResponse(watermarked_image, media_type="image/jpeg")
