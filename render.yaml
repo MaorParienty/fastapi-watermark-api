@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: watermark-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
+    plan: free
+    region: oregon
+    autoDeploy: true
